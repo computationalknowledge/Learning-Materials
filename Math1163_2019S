@@ -1,0 +1,36 @@
+\documentclass{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{enumitem}
+
+\title{Test 2 will take place on July 8}
+\author{Instructor: Peter Sigurdson}
+
+
+\begin{document}
+\maketitle
+
+\begin{enumerate}
+\item Apply equations and formulae to problem solving.
+\item Translating Word Problems into Algebraic Format.
+\item LINEAR GRAPHS: Represent and interpret relationships between two variables graphically.
+\item 4.1 Set up a linear equation in slope-intercept format and graph
+\item 4.2 Identify and define intercepts and slope
+\item 4.3 Write the equation of a line, given its graph or two points on the line or the slope and one point on the line
+\item 4.4 Graph linear functions
+\item 8.1 Solve linear equations
+\item 8.2 Solve applied problems using linear functions
+\item 8.3 Solve problems involving direct linear variation
+\item 8.4 Define and identify domain and range in direct linear variation problems
+\item 8.5 Solve a system of two simultaneous linear equations graphically and algebraically
+\item Math for Finance.
+\item Compound Interest
+\item Mortgage Calculations
+\item Cost of Renting vs. Buying a Home
+\item Case Study: Stock Market Investments
+\item Case Study: Real Estate Investment Analysis
+
+\end{enumerate}
+
+
+\end{document}
