@@ -1,0 +1,227 @@
+\documentclass{article}  
+\UseRawInputEncoding
+\usepackage[left=2cm, right=5cm, top=1cm]{geometry}
+\iffalse
+\begin{lstlisting}[breaklines]
+  Long user text
+\end{lstlisting}
+\fi
+\usepackage{graphicx}
+\usepackage{listings}
+\title  {Working with Exceptions}
+\date{}
+\begin{document}
+\maketitle
+
+\section{What are Exceptions}
+An exception is a mechanism you can use to deal with errors. It’s that simple. In certain scenarios where, let’s say, a C programmer would return an error code, a Java or C\# programmer would most likely throw an exception.
+
+\section{An exception represents}
+ an abrupt interruption of the execution flow. As soon as an exception is thrown, the execution stops. If the exception goes unhandled, the application crashes.
+
+But how do you actually do that in practice? How do you throw or catch an exception? What does all of that even mean?
+
+\section{Format of C\# exceptions}
+
+The main keywords you should use to 
+catch and handle exceptions 
+throw your own exceptions 
+the try keyword and block
+
+Try
+The first part of the exception-handling anatomy is the try block. You use this to try to execute some code that may throw exceptions. Consider the following excerpt of code:
+\begin{lstlisting}[breaklines]
+string content = string.Empty;
+try
+{
+    content = System.IO.File.ReadAllText(@"C:\\file.txt");
+}
+
+The code above declares a variable and assigns the empty string to it. Then, we have the try block. The single line of code inside the try block uses the ReadAllText static method from the System.IO.File class. 
+We fear that the file represented by the path may not exist, in which case an exception will be raised. But of course, that’s not enough. 
+Our code doesn’t do anything to handle the exception. It doesn’t even currently compile! This is the message from the compiler:
+
+Expected catch or finally
+The message is self-explanatory. We need either a catch or finally block since it doesn’t make any sense to try to handle an exception and then forget to do the handling part. Let’s get to that.
+
+Catch
+The catch block is what allows us to actually handle the exception. We’ll expand the previous example with more code.
+
+Check it out:
+
+        static void Main(string[] args)
+        {
+            string content = string.Empty;
+
+            try
+            {
+                Console.WriteLine("First message inside try block.");
+                Console.WriteLine("Second message inside try block.");
+                content = System.IO.File.ReadAllText(@"C:\file.txt");
+                Console.WriteLine("Third message inside try block. This shouldn't be printed.");
+            }
+            catch
+            {
+                Console.WriteLine("First message inside the catch block.");
+                Console.WriteLine("Second message inside the catch block.");
+            }
+
+            Console.WriteLine("Outside the try-catch.");
+            Console.ReadLine();
+        }
+If you run the code above, this is what you should see:
+
+First message inside try block.
+Second message inside try block.
+First message inside the catch block.
+Second message inside the catch block.
+Outside try-catch.
+The file at that path doesn’t exist, so a System.FileNotFoundException is thrown. The execution flow is immediately interrupted when that happens. So the line that would print “Third message inside try block. This shouldn’t be printed.” never gets executed.
+
+The execution flow is picked up by the catch block, which executes its two lines. When it finishes, it hands control back to the main method, that then prints Outside try-catch. and waits for user input.
+
+Finally
+After learning about try and catch, we’re finally (no pun intended) ready to grok this very useful but often misunderstood part of the exception handling mechanism. So, what is finally?
+
+The finally block is a way of making sure that a given piece of code is going to be executed, regardless of an exception being thrown or not. Consider the code below:
+
+try
+{
+    content = System.IO.File.ReadAllText(path);
+    Console.WriteLine("If you're reading this, no exception was thrown.");
+}
+catch (System.IO.FileNotFoundException e)
+{
+    Console.WriteLine("If you're reading this, an exception was thrown.");
+    Console.WriteLine("Message: " + e.Message);
+}
+finally
+{
+    Console.WriteLine("This will be printed, no matter what.");
+}
+That’s still the same example, but now it’s a lot simpler. Notice the finally block at the end. If you run this code, you should see the following messages:
+
+If you're reading this, an exception was thrown.
+Message: Could not find file 'C:\file.txt'.
+This will be printed, no matter what.
+Outside the try-catch.
+Let’s now simulate the file’s existence. Comment out the line trying to read from the file and run the application again. Here’s what you should see now:
+
+If you're reading this, no exception was thrown.
+This will be printed, no matter what.
+Outside the try-catch.
+As you can see, in the most recent scenario, the exception wasn’t thrown, so no lines were executed in the catch block. On the other hand, the finally block was executed in both scenarios.
+
+Throw
+When it comes to exceptions, you won’t always be handling them from others; you can also throw your own. For that, you’re going to use the throw keyword, followed by an instantiation of the class for the exception you wish to throw. The following code exemplifies this:
+
+public ProductService(IProductRepository repository)
+{
+    if (repository == null)
+        throw new ArgumentNullException();
+
+    this.repository = repository;
+}
+Common .NET exceptions
+The following is a list of common .NET exceptions:
+
+System.NullReferenceException
+This is one of the most famous (or rather infamous) exceptions out there. This exception is thrown when you try to call a method/property/indexer/etc. on a variable that contains a null reference—that is, it doesn’t point to any object. The code below will cause a null reference exception:
+
+Person p = people.Where(x => x.SSN == verifySsn).FirstOrDefault();
+string name = p.Name;
+In the example above, we filter a sequence comparing the SSN property on each item to the verifySsnvariable variable. We then use the FirstOrDefault() method to take just the first item from the sequence. If the sequence doesn’t produce any items, then it returns the default value for the type. Since Person is a reference type, its return value is null.
+
+On the next line, we try to dereference the Name property on a null reference. Boom! Null reference exception.
+
+This is an exception you usually neither throw nor catch. You don’t throw it because it’d be pointless. If you wanted to communicate to clients of your code that a given method doesn’t accept null as valid values for its parameters, the right exception to use is the System.ArgumentNullException.
+
+How do you “fix” this exception? In short, you must be careful and diligent about nullability. If you’re writing any piece of code that’s going to be used by third parties—even if those third parties are your coworkers—think very hard about whether to accept null references as valid values or not.
+
+Whatever you decide, make that decision very clear and document it well. You do that by throwing System.ArgumentNullException, for instance, and also using XML documentation headers on your methods.
+
+System.IndexOutOfRangeException
+This exception is similar to the previous one in the sense that application code typically would neither throw it nor catch it.
+
+And why is that?
+
+Well, this exception is thrown when you try to access an element from an array, list, or any indexable sequence using an invalid index value. A quick example:
+
+public static void PrintUrlSufix(string url)
+{
+    var parts = url.Split('.');
+    Console.WriteLine(parts[2]);
+}
+The code above apparently expects a URL in the www.acme.com format. But what if it just gets acme.com? For that matter, what if it gets Hakuna Matata? Yeah, that’s right: System.IndexOutOfBoundException it is.
+
+How do you avoid getting this exception? Never take things for granted. Never just assume that the data will be in the correct format. Do your due diligence and check stuff.
+
+System.IO.IOException
+This C\# exception has a self-explanatory name. It’s exactly what you’d think: it’s the exception thrown when things go wrong during IO operations. Unlike the two previous exceptions, you might find yourself catching or throwing one of these from time to time.
+
+The IOException class is actually the parent of some more specific exceptions, namely:
+
+DirectoryNotFoundException
+
+EndOfStreamException
+
+FileNotFoundException
+
+FileLoadException
+
+PathTooLongException
+
+The documentation for IOException recommends that, whenever possible, you use the more specific exceptions instead of the more general one.
+
+System.Net.WebException
+This exception is network related. It’s thrown if an error occurs when accessing the network using a pluggable protocol. When handling this exception, remember to verify the Response property, which will contain the response returned by the remote host.
+
+System.Data.SqlClient.SqlException
+This exception is related to the database, specifically, SQL Server. It’s thrown when SQL Server returns an error or warning. The class has a property called Errors, which is a collection containing one or more instances of the SqlError class. That, in turn, contains detailed information about the errors that occurred.
+
+System.StackOverflowException
+This exception is thrown when the execution stack overflows, which usually means recursion gone wrong. The code has too many nested method calls. And here’s the thing: this exception isn’t catchable—at least, not since .NET 2.0—which means you’re pretty much without alternatives when this exception is thrown. Your process will be terminated by default.
+
+What you should do instead of catching this exception is write code that prevents it from happening in the first place.
+
+System.OutOfMemoryException
+This is arguably one of the most confusing C# exceptions out there. There are resources around the web that do a great job at clarifying the issue, but I’ll offer a short version here. What happens is that this exception doesn’t refer to the physical memory available.
+
+So, when is this exception thrown?
+
+You know when you want to park your car and you can’t because other drivers haven’t parked properly? If you could just add all of the available spaces between the parked cars, it’d be more than enough to fit your vehicle. But currently, it’s not possible because it’s not a contiguous area.
+
+That’s pretty much what happens when you get this memory. There may be plenty of total memory available, but there’s no continuous portion of it to meet the needed allocation. In practice, this exception happens, for instance, if you try to expand a StringBuilder beyond its MaxCapacity property.
+
+System.InvalidCastException
+This exception also has a self-explanatory name. It’s thrown when code fails to do a cast from one type to another because there isn’t a cast defined. The following code would throw an exception of this type:
+
+object o = "10";
+int x = (int)o;
+This is an exception that you typically wouldn’t catch. Rather, you’d write your code in such a way that it doesn’t happen. For instance, the code below does a type check before attempting to cast:
+
+public override bool Equals (object obj )
+{
+   if (!obj is Foo)
+       return false;
+
+   Foo other = (Foo)obj;
+   return this.bar == other.bar;
+}
+The code above could be simplified using the as operator, but I’ll leave that as an exercise for the reader. Anyway, here’s the thing: what you should actually be trying to do is avoid the problem by not casting in the first place. Make use of generics to prevent getting into situations that need casting.
+
+System.InvalidOperationException
+This exception, like many others before it, is one that you wouldn’t usually catch. Instead, what you should do is code in such a way that it doesn’t happen. Consider the following example:
+
+var numbers = new List<int> { 1, 3, 5 };
+var firstGreaterThanFive = numbers.Where(x => x > 5).First();
+The First LINQ extension method throws when the sequence doesn’t generate any results. If you know the sequence may not produce results sometimes—and that’s OK—you should use FirstOrDefault instead. This method, when called on an empty sequence, returns the default value for the type of the sequence instead of throwing.
+
+System.ObjectDisposedException
+The last C# exception we’ll cover on this post also falls in the category of “shouldn’t handle, fix your code instead.” In other words, it’s developer error. This exception is thrown when you try to do something with an IDisposable that was already disposed of.
+
+This typically happens when the developer calls the Dispose, Close, or another similar method and afterward tries to access a member of the object.
+
+\end{lstlisting}
+
+\end{document}
